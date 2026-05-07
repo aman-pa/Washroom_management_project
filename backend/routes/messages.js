@@ -8,9 +8,9 @@ const { verifyToken, checkRole } = require('../middleware/auth');
 router.post('/', async (req, res) => {
   try {
     const { name, email, subject, content } = req.body;
-    const timeStr = new Date().toLocaleString([], { 
-      year: 'numeric', month: 'short', day: 'numeric', 
-      hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'
+    const timeStr = new Date().toLocaleString([], {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
     });
 
     const newMessage = new Message({
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
     await newMessage.save();
 
     // Log the activity internally
-    const logTimeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'});
+    const logTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
     await new Activity({ time: logTimeStr, message: `New contact message received from ${email}` }).save();
 
     res.status(201).json({ success: true, message: 'Message sent successfully' });

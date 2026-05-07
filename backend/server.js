@@ -2,7 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors = require('cors');//ye frontend html files ko backend se communicate krwata h
 const bcrypt = require('bcryptjs');
 
 // Routes
@@ -25,8 +25,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static frontend files from parent directory
-app.use(express.static(path.join(__dirname, '../')));
+// Serve static frontend files from frontend directory
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // API Routes
 app.use('/api', authRoutes); // /api/login, /api/register
@@ -65,7 +65,7 @@ async function seedDatabase() {
   const userCount = await User.countDocuments();
   if (userCount === 0) {
     console.log('Seeding Database with default users and data...');
-    
+
     // Hash password for default users
     const salt = await bcrypt.genSalt(10);
     const pwd = await bcrypt.hash('password123', salt);
@@ -89,7 +89,7 @@ async function seedDatabase() {
       { idString: '#10041', washroomId: 'W-301', issueType: 'Out of Soap', reportedBy: 'Dr. Alan Grant', time: '09:15 AM', status: 'Assigned to Janitor Team A', createdAt: '09:15 AM' }
     ]);
 
-    const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'});
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
     await new Activity({ time: timeStr, message: 'System initialized and seeded.' }).save();
     console.log('Database seeded!');
   }
@@ -128,10 +128,10 @@ async function autoResetIfNewDay() {
   if (lastReset !== today) {
     try {
       await Washroom.updateMany({}, { status: 'Dirty', lastCleanedTime: 'Never' });
-      
+
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
       await new Activity({ time: timeStr, message: 'System auto-reset: All washrooms reset to Dirty for the new day.' }).save();
-      
+
       saveLastResetDate(today);
       console.log(`Auto-reset completed for new day: ${today}`);
     } catch (err) {
