@@ -9,13 +9,16 @@ const Activity = require('../models/Activity');
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    const existingUser = await User.findOne({ email });
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    const cleanRole = role ? role.trim().toLowerCase() : '';
+
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) return res.status(400).json({ error: 'User already exists' });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = new User({ name, email, password: hashedPassword, role });
+    const newUser = new User({ name, email: cleanEmail, password: hashedPassword, role: cleanRole });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
@@ -27,10 +30,13 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    const user = await User.findOne({ email });
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    const cleanRole = role ? role.trim().toLowerCase() : '';
+
+    const user = await User.findOne({ email: cleanEmail });
     
     if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.role !== role) return res.status(403).json({ error: 'Invalid role selection for this user' });
+    if (user.role !== cleanRole) return res.status(403).json({ error: 'Invalid role selection for this user' });
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ error: 'Invalid credentials' });
